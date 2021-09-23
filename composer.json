@@ -1,0 +1,30 @@
+{
+    "name": "neosmic/arango-php-ogm",
+    "description": "PHP library for Object-Graph Mapping for a hierarchical graph database in ArangoDBPHP library for Object-Graph Mapping for a hierarchical graph database in ArangoDB",
+    "type": "library",
+    "require": {
+        "triagens/arangodb": "^3.8",
+        "phpunit/phpunit": "^9.5"
+    },
+    "require-dev": {
+        "triagens/arangodb": "^3.8",
+        "phpunit/phpunit": "^9.5"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Neosmic\\ArangoPhpOgm\\": "src/"
+        }
+    },
+    "autoload-dev":{
+        "psr-4": {
+            "Neosmic\\ArangoPhpOgm\\Test": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Leonardo Hernandez Cabrera",
+            "email": "neosmic@gmail.com"
+        }
+    ]
+}
