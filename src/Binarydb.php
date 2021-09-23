@@ -2,7 +2,6 @@
 
 namespace Neosmic\ArangoPhpOgm;
 
-
 use Config;
 use ArangoDBClient\Collection as ArangoCollection;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
@@ -17,8 +16,6 @@ use ArangoDBClient\ClientException as ArangoClientException;
 use ArangoDBClient\ServerException as ArangoServerException;
 use ArangoDBClient\Statement as ArangoStatement;
 use ArangoDBClient\UpdatePolicy as ArangoUpdatePolicy;
-//use Controller\Globals;
-//use Controller\SysMessages;
 
 class BinaryConnection
 {
@@ -26,12 +23,12 @@ class BinaryConnection
     public $connectionOptions;
     public $connection;
     /********************** DB configuration****************** */
-    public static $main_node = "MAIN";
-    public static $nodesCollection = "library";
-    public static $edgesCollection = "links";
-    public static $_tags = [];
-    public static $_leaves = [];
-    public static $_utc = 0;
+    public static $mainNode = 'MAIN';
+    public static $nodesCollection = 'library';
+    public static $edgesCollection = 'links';
+    public static $labels = [];
+    public static $tails = [];
+    public static $utc = 0;
     public static $setted = false;
 
     public function __construct()
@@ -45,7 +42,7 @@ class BinaryConnection
             // database name
             ArangoConnectionOptions::OPTION_DATABASE => config('binarydb.db_name'), // $this->db_name,
             // server endpoint to connect to
-            ArangoConnectionOptions::OPTION_ENDPOINT => config('binarydb.db_server'), // $this->db_server, 
+            ArangoConnectionOptions::OPTION_ENDPOINT => config('binarydb.db_server'), // $this->db_server,
 
             // authorization type to use (currently supported: 'Basic')
             ArangoConnectionOptions::OPTION_AUTH_TYPE => 'Basic',
@@ -53,7 +50,6 @@ class BinaryConnection
             ArangoConnectionOptions::OPTION_AUTH_USER => config('binarydb.db_user'), //$this->db_user,
             // password for basic authorization
             ArangoConnectionOptions::OPTION_AUTH_PASSWD => config('binarydb.db_user_password'), // $this->db_user_pass,
-            // connection persistence on server. can use either 'Close' (one-time connections) or 'Keep-Alive' (re-used connections)
             ArangoConnectionOptions::OPTION_CONNECTION => 'Keep-Alive',
             // connect timeout in seconds
             ## ArangoConnectionOptions::OPTION_TIMEOUT => 3,
@@ -65,7 +61,7 @@ class BinaryConnection
             ArangoConnectionOptions::OPTION_UPDATE_POLICY => ArangoUpdatePolicy::LAST,
         ];
 
-        // turn on exception logging (logs to whatever PHP is configured) 
+        // turn on exception logging (logs to whatever PHP is configured)
         //Activar para obtener información adicional de los errores
         //ArangoException::enableLogging();
         //Comentarios omitidos
@@ -73,10 +69,10 @@ class BinaryConnection
     }
     private static function layer($layer)
     {
-        if ($layer == "node") {
-            $collection = SELF::$nodesCollection;
-        } elseif ($layer == "edge") {
-            $collection = SELF::$edgesCollection;
+        if ($layer == 'node') {
+            $collection = self::$nodesCollection;
+        } elseif ($layer == 'edge') {
+            $collection = self::$edgesCollection;
         } else {
             return dd(" $layer layer doesn't exist ");
         }
@@ -85,17 +81,17 @@ class BinaryConnection
 
     public static function start()
     {
-        if (SELF::$theInstance === null) {
-            SELF::$theInstance = new self();
+        if (self::$theInstance === null) {
+            self::$theInstance = new self();
         } else {
         }
-        return SELF::$theInstance;
+        return self::$theInstance;
     }
-    public static function setTags(array $pre_out)
+    public static function setTags(array $preOut)
     {
-        SELF::$_leaves = $out["leaves"] = $pre_out["leaves"];
-        SELF::$_tags = $out["tags"] = $pre_out["tags"];
-        SELF::$_utc = $out["utc"] = $pre_out["utc"];
+        self::$tails = $out['leaves'] = $preOut['leaves'];
+        self::$labels = $out['tags'] = $preOut['tags'];
+        self::$utc = $out['utc'] = $preOut['utc'];
         //dd($out);
         return $out;
     }
@@ -105,10 +101,10 @@ class BinaryConnection
         $statement = new ArangoStatement(
             $this->connection,
             array(
-                "query"     => $query,
-                "count"     => true,
-                "batchSize" => 1000,
-                "sanitize"  => true
+                'query'     => $query,
+                'count'     => true,
+                'batchSize' => 1000,
+                'sanitize'  => true
             )
         );
         try {
@@ -126,116 +122,116 @@ class BinaryConnection
     }
     public static function query($query)
     {
-        $conn = SELF::start();
+        $conn = self::start();
         return $conn->queryAnswer($query);
     }
-    public static function all($_tag = null)
+    public static function all($tag = null)
     {
-        if ($_tag != null) {
-            $filter = " FILTER d._tag == '$_tag' ";
+        if ($tag != null) {
+            $filter = " FILTER d._tag == '$tag' ";
         } else {
-            $filter = "";
+            $filter = '';
         }
 
-        $query = " FOR d IN " . SELF::$nodesCollection . " " . $filter . " SORT d.dateUpdate RETURN d ";
+        $query = ' FOR d IN ' . self::$nodesCollection . ' ' . $filter . ' SORT d.dateUpdate RETURN d ';
         //dd($query);
-        return SELF::query($query);
+        return self::query($query);
     }
-    public static function one(string $_id)
+    public static function one(string $id)
     {
-        return SELF::query("RETURN DOCUMENT('$_id')")[0];
+        return self::query("RETURN DOCUMENT('$id')")[0];
     }
     public static function main()
     {
-        SELF::$main_node = config('binarydb.main_key');
-        SELF::$nodesCollection = config('binarydb.nodes_collection');
-        SELF::$edgesCollection = config('binarydb.edges_collection');
-        $out = SELF::one(SELF::$nodesCollection . "/" . SELF::$main_node);
-        SELF::setTags($out);
+        self::$mainNode = config('binarydb.main_key');
+        self::$nodesCollection = config('binarydb.nodes_collection');
+        self::$edgesCollection = config('binarydb.edges_collection');
+        $out = self::one(self::$nodesCollection . '/' . self::$mainNode);
+        self::setTags($out);
         return $out;
     }
-    public static function parents(string $_key)
+    public static function parents(string $key)
     {
         $query = " FOR node, edge IN 1..1 INBOUND '"
-            . SELF::$nodesCollection . "/" . $_key . "' "
-            . SELF::$edgesCollection
-            . " RETURN {_key:node._key,_id:node._id,_tag:node._tag,name:node.name} ";
-        return SELF::query($query);
+            . self::$nodesCollection . '/' . $key . "' "
+            . self::$edgesCollection
+            . ' RETURN {_key:node._key,id:node._id,_tag:node._tag,name:node.name} ';
+        return self::query($query);
     }
-    public static function insert(array $data, string $layer = "node")
+    public static function insert(array $data, string $layer = 'node')
     {
-        $collection = SELF::layer($layer);
-        $query = " INSERT " . json_encode($data)
+        $collection = self::layer($layer);
+        $query = ' INSERT ' . json_encode($data)
             . " INTO '" . $collection . "' RETURN NEW ";
-        return SELF::query($query);
+        return self::query($query);
     }
-    public static function update(string $_key, array $data)
+    public static function update(string $key, array $data)
     {
-        $data["dateUpdate"] = "..NOW..";
-        $data_str = json_encode($data);
-        $data_str = str_replace('"..NOW.."', " DATE_ADD(DATE_NOW()," . SELF::$_utc . ",'h') ", $data_str);
-        $query = " UPDATE  {_key:'$_key'} WITH "
-            . $data_str . " IN "
-            . SELF::$nodesCollection . " RETURN NEW ";
+        $data['dateUpdate'] = '..NOW..';
+        $dataStr = json_encode($data);
+        $dataStr = str_replace('"..NOW.."', ' DATE_ADD(DATE_NOW(),' . self::$utc . ",'h') ", $dataStr);
+        $query = " UPDATE  {_key:'$key'} WITH "
+            . $dataStr . ' IN '
+            . self::$nodesCollection . ' RETURN NEW ';
         //dd($query);
-        return SELF::query($query);
+        return self::query($query);
     }
-    public static function children(string $_key, $_tag = "")
+    public static function children(string $key, $tag = '')
     {
-        if ($_tag != "") {
-            $filter = " FILTER edge._tag == '$_tag' ";
+        if ($tag != '') {
+            $filter = " FILTER edge._tag == '$tag' ";
         } else {
-            $filter = "";
+            $filter = '';
         }
         $query = " FOR node, edge IN 1..1 OUTBOUND '"
-            . SELF::$nodesCollection . "/" . $_key . "' "
-            . SELF::$edgesCollection
+            . self::$nodesCollection . '/' . $key . "' "
+            . self::$edgesCollection
             . $filter
-            . " RETURN {_key:node._key,_id:node._id,_tag:node._tag,name:node.name}  ";
-        return SELF::query($query);
+            . ' RETURN {_key:node._key,id:node._id,_tag:node._tag,name:node.name}  ';
+        return self::query($query);
     }
-    public static function remove($_key, $layer = "node")
+    public static function remove($key, $layer = 'node')
     {
-        $collection = SELF::layer($layer);
-        $query = " REMOVE {_key:'$_key'} IN " . $collection . "";
-        SELF::query($query);
+        $collection = self::layer($layer);
+        $query = " REMOVE {_key:'$key'} IN " . $collection . '';
+        self::query($query);
     }
-    public static function unlink(string $_from_key, string $_to_key)
+    public static function unlink(string $fromKey, string $toKey)
     {
-        $query = " FOR d IN " . SELF::$edgesCollection
-            . " FILTER d._from == '" . SELF::$nodesCollection . "/" . $_from_key
-            . "' && d._to == '" . SELF::$nodesCollection . "/" . $_to_key . "' "
-            . " REMOVE {_key: d._key} IN  " . SELF::$edgesCollection . " ";
-        SELF::query($query);
+        $query = ' FOR d IN ' . self::$edgesCollection
+            . " FILTER d._from == '" . self::$nodesCollection . '/' . $fromKey
+            . "' && d._to == '" . self::$nodesCollection . '/' . $toKey . "' "
+            . ' REMOVE {_key: d._key} IN  ' . self::$edgesCollection . ' ';
+        self::query($query);
     }
-    public static function link(string $_key_from, string $_key_to, array $data = [])
+    public static function link(string $keyFrom, string $keyTo, array $data = [])
     {
-        $_from = SELF::$nodesCollection . "/" . $_key_from;
-        $_to = SELF::$nodesCollection . "/" . $_key_to;
-        $data = array_merge(["_from" => $_from, "_to" => $_to], $data);
-        return SELF::insert($data, "edge");
+        $_from = self::$nodesCollection . '/' . $keyFrom;
+        $_to = self::$nodesCollection . '/' . $keyTo;
+        $data = array_merge(['_from' => $_from, '_to' => $_to], $data);
+        return self::insert($data, 'edge');
     }
-    public static function timestamp($_key, $property = "dateUpdate")
+    public static function timestamp($key, $property = 'dateUpdate')
     {
-        $query = " UPDATE {_key:'$_key'} WITH { $property : DATE_ADD(DATE_NOW(), " . SELF::$_utc . ",'h')} "
-            . " IN " . SELF::$nodesCollection . " RETURN NEW";
-        return SELF::query($query);
+        $query = " UPDATE {_key:'$key'} WITH { $property : DATE_ADD(DATE_NOW(), " . self::$utc . ",'h')} "
+            . ' IN ' . self::$nodesCollection . ' RETURN NEW';
+        return self::query($query);
     }
-    public static function is_linked(string $_key_from, string $_key_to)
+    public static function isLinked(string $keyFrom, string $keyTo)
     {
-        $query = " FOR d IN " . SELF::$edgesCollection
-            . " FILTER d._from =='" . SELF::$nodesCollection . "/" . $_key_from . "' "
-            . " && d._to  =='" . SELF::$nodesCollection . "/" . $_key_to . "' "
-            . " RETURN d._id ";
-        if (SELF::query($query) != null) {
+        $query = ' FOR d IN ' . self::$edgesCollection
+            . " FILTER d._from =='" . self::$nodesCollection . '/' . $keyFrom . "' "
+            . " && d._to  =='" . self::$nodesCollection . '/' . $keyTo . "' "
+            . ' RETURN d._id ';
+        if (self::query($query) != null) {
             return true;
         } else {
             return false;
         }
     }
-    public static function param(string $_key, string $param, string $layer = "node")
+    public static function param(string $key, string $param, string $layer = 'node')
     {
-        $collection = SELF::layer($layer);
-        return SELF::query("RETURN DOCUMENT('" . $collection . "/" . $_key . "').$param");
+        $collection = self::layer($layer);
+        return self::query("RETURN DOCUMENT('" . $collection . '/' . $key . "').$param");
     }
 }
