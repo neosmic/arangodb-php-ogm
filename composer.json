@@ -4,7 +4,8 @@
   "type": "library",
   "require": {
     "triagens/arangodb": "^3.8",
-    "phpunit/phpunit": "^9.5"
+    "phpunit/phpunit": "^9.5",
+    "vlucas/phpdotenv": "^5.3"
   },
   "require-dev": {
     "triagens/arangodb": "^3.8",
@@ -26,7 +27,8 @@
   "autoload": {
     "psr-4": {
       "Neosmic\\ArangoPhpOgm\\": "src/"
-    }
+    },
+    "files": ["src/helpers.php"]
   },
   "autoload-dev": {
     "psr-4": {

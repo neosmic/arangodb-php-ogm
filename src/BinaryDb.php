@@ -2,7 +2,7 @@
 
 namespace Neosmic\ArangoPhpOgm;
 
-use Config;
+//use Config;
 use ArangoDBClient\Collection as ArangoCollection;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\Connection as ArangoConnection;
@@ -17,7 +17,7 @@ use ArangoDBClient\ServerException as ArangoServerException;
 use ArangoDBClient\Statement as ArangoStatement;
 use ArangoDBClient\UpdatePolicy as ArangoUpdatePolicy;
 
-class BinaryConnection
+class BinaryDb
 {
     private static $theInstance = null;
     public $connectionOptions;
@@ -30,41 +30,26 @@ class BinaryConnection
     public static $tails = [];
     public static $utc = 0;
     public static $setted = false;
+    private static $dir = __DIR__;
 
-    public function __construct()
+    public function __construct($dir = __DIR__)
     {
         //dd( config('binarydb.db_server'));
         $this->property = 1;
 
-
+        //$config('binarydb.db_name') = $_ENV['db_name'];
+        #PENDIENTE INCLUIR https://github.com/vlucas/phpdotenv para la carga de variables de entorno y datos de conexión
         // set up some basic connection options
-        $this->connectionOptions = [
-            // database name
-            ArangoConnectionOptions::OPTION_DATABASE => config('binarydb.db_name'), // $this->db_name,
-            // server endpoint to connect to
-            ArangoConnectionOptions::OPTION_ENDPOINT => config('binarydb.db_server'), // $this->db_server,
-
-            // authorization type to use (currently supported: 'Basic')
-            ArangoConnectionOptions::OPTION_AUTH_TYPE => 'Basic',
-            // user for basic authorization
-            ArangoConnectionOptions::OPTION_AUTH_USER => config('binarydb.db_user'), //$this->db_user,
-            // password for basic authorization
-            ArangoConnectionOptions::OPTION_AUTH_PASSWD => config('binarydb.db_user_password'), // $this->db_user_pass,
-            ArangoConnectionOptions::OPTION_CONNECTION => 'Keep-Alive',
-            // connect timeout in seconds
-            ## ArangoConnectionOptions::OPTION_TIMEOUT => 3,
-            // whether or not to reconnect when a keep-alive connection has timed out on server
-            ArangoConnectionOptions::OPTION_RECONNECT => true,
-            // optionally create new collections when inserting documents
-            ArangoConnectionOptions::OPTION_CREATE => true,
-            // optionally create new collections when inserting documents
-            ArangoConnectionOptions::OPTION_UPDATE_POLICY => ArangoUpdatePolicy::LAST,
-        ];
-
+        $config = Config::load($dir);
+        $this->connectionOptions = $config['config'];
+        self::$mainNode = $config["mainNode"]; // config('binarydb.main_key');
+        self::$nodesCollection = $config["nodesCollection"]; //config('binarydb.nodes_collection');
+        self::$edgesCollection = $config['edgesCollection']; // config('binarydb.edges_collection');
         // turn on exception logging (logs to whatever PHP is configured)
         //Activar para obtener información adicional de los errores
         //ArangoException::enableLogging();
         //Comentarios omitidos
+
         $this->connection = new ArangoConnection($this->connectionOptions);
     }
     private static function layer($layer)
@@ -79,17 +64,17 @@ class BinaryConnection
         return $collection;
     }
 
-    public static function start()
+    public static function start($dir = __DIR__)
     {
         if (self::$theInstance === null) {
-            self::$theInstance = new self();
+            self::$theInstance = new self($dir);
         } else {
         }
         return self::$theInstance;
     }
     public static function setTags(array $preOut)
     {
-        self::$tails = $out['leaves'] = $preOut['leaves'];
+        self::$tails = $out['tails'] = $preOut['tails'];
         self::$labels = $out['tags'] = $preOut['tags'];
         self::$utc = $out['utc'] = $preOut['utc'];
         //dd($out);
@@ -143,9 +128,9 @@ class BinaryConnection
     }
     public static function main()
     {
-        self::$mainNode = config('binarydb.main_key');
-        self::$nodesCollection = config('binarydb.nodes_collection');
-        self::$edgesCollection = config('binarydb.edges_collection');
+        // self::$mainNode = config('binarydb.main_key');
+        // self::$nodesCollection = config('binarydb.nodes_collection');
+        // self::$edgesCollection = config('binarydb.edges_collection');
         $out = self::one(self::$nodesCollection . '/' . self::$mainNode);
         self::setTags($out);
         return $out;

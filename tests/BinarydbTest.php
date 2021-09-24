@@ -1,19 +1,20 @@
 <?php
 
+use \Neosmic\ArangoPhpOgm\BinaryDb;
 use PHPUnit\Framework\TestCase;
 
 class BinarydbTest extends TestCase
 {
-    public function testPushAndPop()
+    public function testStart()
     {
-        $stack = [];
-        $this->assertSame(0, count($stack));
+        $connection = BinaryDb::start("/app");
 
-        array_push($stack, 'foo');
-        $this->assertSame('foo', $stack[count($stack) - 1]);
-        $this->assertSame(1, count($stack));
-
-        $this->assertSame('foo', array_pop($stack));
-        $this->assertSame(0, count($stack));
+        $this->assertContainsOnlyInstancesOf(BinaryDb::class, [$connection]);
+    }
+    public function testMain()
+    {
+        $connection = BinaryDb::start("/app");
+        $out = $connection::main();
+        $this->assertArrayHasKey("_key", $out);
     }
 }
