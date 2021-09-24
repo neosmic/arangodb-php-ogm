@@ -1,30 +1,44 @@
 {
-    "name": "neosmic/arango-php-ogm",
-    "description": "PHP library for Object-Graph Mapping for a hierarchical graph database in ArangoDBPHP library for Object-Graph Mapping for a hierarchical graph database in ArangoDB",
-    "type": "library",
-    "require": {
-        "triagens/arangodb": "^3.8",
-        "phpunit/phpunit": "^9.5"
+  "name": "neosmic/arango-php-ogm",
+  "description": "PHP library for Object-Graph Mapping for a hierarchical graph database in ArangoDBPHP library for Object-Graph Mapping for a hierarchical graph database in ArangoDB",
+  "type": "library",
+  "require": {
+    "triagens/arangodb": "^3.8",
+    "phpunit/phpunit": "^9.5",
+    "vlucas/phpdotenv": "^5.3"
+  },
+  "require-dev": {
+    "triagens/arangodb": "^3.8",
+    "phpunit/phpunit": "^9.5",
+    "squizlabs/php_codesniffer": "^3.6"
+  },
+  "license": "MIT",
+  "scripts": {
+    "phpunit": "phpunit --stop-on-error --stop-on-failure --testdox",
+    "phpunit-xml": "phpunit --stop-on-error --stop-on-failure --coverage-clover phpunit.coverage.xml",
+    "phpcs-check": "phpcs --colors -s",
+    "phpcs-fix": "phpcbf --colors -s",
+    "phpcs-auto-check": "@phpcs-check --standard=.phpcs.xml",
+    "phpcs-auto-fix": "@phpcs-fix --standard=.phpcs.xml",
+    "phpcs-auto-check-project": "phpcs --report=summary -p",
+    "phpcs-auto-fix-project": "phpcbf --report=summary -p"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "Neosmic\\ArangoPhpOgm\\": "src/"
     },
-    "require-dev": {
-        "triagens/arangodb": "^3.8",
-        "phpunit/phpunit": "^9.5"
-    },
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Neosmic\\ArangoPhpOgm\\": "src/"
-        }
-    },
-    "autoload-dev":{
-        "psr-4": {
-            "Neosmic\\ArangoPhpOgm\\Test": "tests/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Leonardo Hernandez Cabrera",
-            "email": "neosmic@gmail.com"
-        }
-    ]
+    "files": ["src/helpers.php"]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Neosmic\\ArangoPhpOgm\\Test\\": "tests/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Leonardo Hernandez Cabrera",
+      "email": "neosmic@gmail.com"
+    }
+  ]
 }
