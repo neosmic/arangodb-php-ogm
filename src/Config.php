@@ -19,16 +19,16 @@ class Config
         }
         $out['config'] =   [
             // database name
-            ArangoConnectionOptions::OPTION_DATABASE => $_ENV["ADB_NAME"], // $this->db_name,
+            ArangoConnectionOptions::OPTION_DATABASE => $_ENV['ADB_NAME'],
             // server endpoint to connect to
-            ArangoConnectionOptions::OPTION_ENDPOINT => $_ENV["ADB_SERVER"], // $config('binarydb.db_server'), // $this->db_server,
+            ArangoConnectionOptions::OPTION_ENDPOINT => $_ENV['ADB_SERVER'],
 
             // authorization type to use (currently supported: 'Basic')
             ArangoConnectionOptions::OPTION_AUTH_TYPE => 'Basic',
             // user for basic authorization
-            ArangoConnectionOptions::OPTION_AUTH_USER => $_ENV["ADB_USER"], // $config('binarydb.db_user'), //$this->db_user,
+            ArangoConnectionOptions::OPTION_AUTH_USER => $_ENV['ADB_USER'],
             // password for basic authorization
-            ArangoConnectionOptions::OPTION_AUTH_PASSWD => $_ENV["ADB_USER_PASSWORD"], // $config('binarydb.db_user_password'), // $this->db_user_pass,
+            ArangoConnectionOptions::OPTION_AUTH_PASSWD => $_ENV['ADB_USER_PASSWORD'],
             ArangoConnectionOptions::OPTION_CONNECTION => 'Keep-Alive',
             // connect timeout in seconds
             ## ArangoConnectionOptions::OPTION_TIMEOUT => 3,

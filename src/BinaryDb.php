@@ -30,7 +30,7 @@ class BinaryDb
     public static $tails = [];
     public static $utc = 0;
     public static $setted = false;
-    private static $dir = __DIR__;
+
 
     public function __construct($dir = __DIR__)
     {
@@ -42,8 +42,8 @@ class BinaryDb
         // set up some basic connection options
         $config = Config::load($dir);
         $this->connectionOptions = $config['config'];
-        self::$mainNode = $config["mainNode"]; // config('binarydb.main_key');
-        self::$nodesCollection = $config["nodesCollection"]; //config('binarydb.nodes_collection');
+        self::$mainNode = $config['mainNode']; // config('binarydb.main_key');
+        self::$nodesCollection = $config['nodesCollection']; //config('binarydb.nodes_collection');
         self::$edgesCollection = $config['edgesCollection']; // config('binarydb.edges_collection');
         // turn on exception logging (logs to whatever PHP is configured)
         //Activar para obtener información adicional de los errores
