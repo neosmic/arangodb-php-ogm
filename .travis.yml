@@ -1,0 +1,16 @@
+language: php
+
+php:
+  - 7.4
+  - 8.0
+
+cache:
+  directories:
+    - node_modules
+    - vendor
+
+before_script:
+  - composer install --no-interaction
+
+script:
+  - composer phpcs-auto-check-project
