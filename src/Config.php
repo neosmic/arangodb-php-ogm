@@ -14,9 +14,6 @@ class Config
 
         $env = Dotenv::createMutable($dir);
         $env->load();
-
-        if ($_ENV['ADB_NAME'] != null) {
-        }
         $out['config'] =   [
             // database name
             ArangoConnectionOptions::OPTION_DATABASE => $_ENV['ADB_NAME'],
