@@ -2,7 +2,6 @@
 
 namespace Neosmic\ArangoPhpOgm;
 
-//use Config;
 use ArangoDBClient\Collection as ArangoCollection;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\Connection as ArangoConnection;
@@ -34,22 +33,12 @@ class BinaryDb
 
     public function __construct($dir = __DIR__)
     {
-        //dd( config('binarydb.db_server'));
         $this->property = 1;
-
-        //$config('binarydb.db_name') = $_ENV['db_name'];
-        #PENDIENTE INCLUIR https://github.com/vlucas/phpdotenv para la carga de variables de entorno y datos de conexión
-        // set up some basic connection options
         $config = Config::load($dir);
         $this->connectionOptions = $config['config'];
-        self::$mainNode = $config['mainNode']; // config('binarydb.main_key');
-        self::$nodesCollection = $config['nodesCollection']; //config('binarydb.nodes_collection');
-        self::$edgesCollection = $config['edgesCollection']; // config('binarydb.edges_collection');
-        // turn on exception logging (logs to whatever PHP is configured)
-        //Activar para obtener información adicional de los errores
-        //ArangoException::enableLogging();
-        //Comentarios omitidos
-
+        self::$mainNode = $config['mainNode'];
+        self::$nodesCollection = $config['nodesCollection'];
+        self::$edgesCollection = $config['edgesCollection'];
         $this->connection = new ArangoConnection($this->connectionOptions);
     }
     private static function layer($layer)
@@ -77,7 +66,6 @@ class BinaryDb
         self::$tails = $out['tails'] = $preOut['tails'];
         self::$labels = $out['tags'] = $preOut['tags'];
         self::$utc = $out['utc'] = $preOut['utc'];
-        //dd($out);
         return $out;
     }
     public function queryAnswer($query)
@@ -95,12 +83,7 @@ class BinaryDb
         try {
             $cursor = $statement->execute();
         } catch (\Exception $e) {
-            dd($query);
-            // echo "<script> console.log(\"{$e}\")</script>";
-            // //throw $th;
-            // echo "<h2>Error en el llamado a la Base datos, por favor contacte al administrador</h2>";
-            // print_r("Query_Fallido", $query);
-            //$this->messages::show_errors_js();
+            print($query);
             die;
         }
         return $cursor->getMetadata()['result'];
@@ -119,7 +102,6 @@ class BinaryDb
         }
 
         $query = ' FOR d IN ' . self::$nodesCollection . ' ' . $filter . ' SORT d.dateUpdate RETURN d ';
-        //dd($query);
         return self::query($query);
     }
     public static function one(string $id)
@@ -128,9 +110,6 @@ class BinaryDb
     }
     public static function main()
     {
-        // self::$mainNode = config('binarydb.main_key');
-        // self::$nodesCollection = config('binarydb.nodes_collection');
-        // self::$edgesCollection = config('binarydb.edges_collection');
         $out = self::one(self::$nodesCollection . '/' . self::$mainNode);
         self::setTags($out);
         return $out;
@@ -158,7 +137,6 @@ class BinaryDb
         $query = " UPDATE  {_key:'$key'} WITH "
             . $dataStr . ' IN '
             . self::$nodesCollection . ' RETURN NEW ';
-        //dd($query);
         return self::query($query);
     }
     public static function children(string $key, $tag = '')
@@ -208,11 +186,7 @@ class BinaryDb
             . " FILTER d._from =='" . self::$nodesCollection . '/' . $keyFrom . "' "
             . " && d._to  =='" . self::$nodesCollection . '/' . $keyTo . "' "
             . ' RETURN d._id ';
-        if (self::query($query) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return self::query($query) != null ? true : false;
     }
     public static function param(string $key, string $param, string $layer = 'node')
     {
