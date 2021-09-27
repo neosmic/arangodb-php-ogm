@@ -22,7 +22,7 @@ También puede renombrar el archivo .env.example
 Debe crearse al menos un documento dentro de la colección de nodos con la propiedad \_tag='main', asimismo se deben asignar las propiedades: *tails*, *tags* y *utc* si puede asignarle el valor de *_key* como 'main'. Ej:
 ```json
 {
-    '_tag':'main'
+    "_tag":"main"
 }
 ```
 

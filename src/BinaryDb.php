@@ -127,7 +127,7 @@ class BinaryDb
         $collection = self::layer($layer);
         $query = ' INSERT ' . json_encode($data)
             . " INTO '" . $collection . "' RETURN NEW ";
-        return self::query($query);
+        return self::query($query)[0];
     }
     public static function update(string $key, array $data)
     {

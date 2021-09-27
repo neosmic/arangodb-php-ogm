@@ -2,3 +2,4 @@
 /.phpunit.cache/
 to_fix.log
 .env
+index.php
