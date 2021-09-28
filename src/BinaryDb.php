@@ -29,17 +29,20 @@ class BinaryDb
     public static $tails = [];
     public static $utc = 0;
     public static $setted = false;
+    private static $envDir = __DIR__;
 
 
     public function __construct($dir = __DIR__)
     {
         $this->property = 1;
+        self::$envDir = $dir;
         $config = Config::load($dir);
         $this->connectionOptions = $config['config'];
         self::$mainNode = $config['mainNode'];
         self::$nodesCollection = $config['nodesCollection'];
         self::$edgesCollection = $config['edgesCollection'];
         $this->connection = new ArangoConnection($this->connectionOptions);
+        
     }
     private static function layer($layer)
     {
@@ -48,17 +51,18 @@ class BinaryDb
         } elseif ($layer == 'edge') {
             $collection = self::$edgesCollection;
         } else {
-            return dd(" $layer layer doesn't exist ");
+            return " $layer layer doesn't exist ";
         }
         return $collection;
     }
 
-    public static function start($dir = __DIR__)
+    public static function start()
     {
+        $dir = self::$envDir;
         if (self::$theInstance === null) {
             self::$theInstance = new self($dir);
-        } else {
-        }
+            self::setTags(self::main());
+        } 
         return self::$theInstance;
     }
     public static function setTags(array $preOut)
@@ -111,7 +115,6 @@ class BinaryDb
     public static function main()
     {
         $out = self::one(self::$nodesCollection . '/' . self::$mainNode);
-        self::setTags($out);
         return $out;
     }
     public static function parents(string $key)
@@ -127,17 +130,22 @@ class BinaryDb
         $collection = self::layer($layer);
         $query = ' INSERT ' . json_encode($data)
             . " INTO '" . $collection . "' RETURN NEW ";
-        return self::query($query)[0];
+        $key = self::query($query)[0]['_key'];
+        return self::timestamp($key, $layer);
     }
-    public static function update(string $key, array $data)
-    {
-        $data['dateUpdate'] = '..NOW..';
+    public static function update(
+        string $key,
+        array $data,
+        string $layer = 'node',
+        string $timeStampProperty = "dateUpdate"
+    ) {
+        $collection = self::layer($layer);
         $dataStr = json_encode($data);
-        $dataStr = str_replace('"..NOW.."', ' DATE_ADD(DATE_NOW(),' . self::$utc . ",'h') ", $dataStr);
+        self::timestamp($key, $layer, $timeStampProperty);
         $query = " UPDATE  {_key:'$key'} WITH "
             . $dataStr . ' IN '
-            . self::$nodesCollection . ' RETURN NEW ';
-        return self::query($query);
+            . $collection . ' RETURN NEW ';
+        return self::query($query)[0];
     }
     public static function children(string $key, $tag = '')
     {
@@ -174,11 +182,12 @@ class BinaryDb
         $data = array_merge(['_from' => $_from, '_to' => $_to], $data);
         return self::insert($data, 'edge');
     }
-    public static function timestamp($key, $property = 'dateUpdate')
+    public static function timestamp($key,  string $layer = 'node',string $property = 'dateUpdate')
     {
+        $collection = self::layer($layer);
         $query = " UPDATE {_key:'$key'} WITH { $property : DATE_ADD(DATE_NOW(), " . self::$utc . ",'h')} "
-            . ' IN ' . self::$nodesCollection . ' RETURN NEW';
-        return self::query($query);
+            . ' IN ' . $collection . ' RETURN NEW';
+        return self::query($query)[0];
     }
     public static function isLinked(string $keyFrom, string $keyTo)
     {
