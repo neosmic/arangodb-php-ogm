@@ -37,11 +37,23 @@ composer require neosmic/arango-php-ogm
 ## Uso
 Requiere un archivo .env y se debe indicar el directorio del mismo al momento de inicializar el objeto, ej:
 ```php
-$arangoDbOgm = Neosmic\ArangoPhpOgm\BinaryDb::start(realpath(dirname(__FILE__)) . '/src'); // Buscará el archivo .env en la carpeta /src
-$main = $arangoDbOgm::main(); // Devuelve los valores almacenados en el nodo main.
-$data = ['propiedad' => 'valor', 'propiedad2' => 'valor2'];
-$new = $arangoDbOgm::insert($data); // crea un nuevo nodo y devuelve el nodo creado
-$arangoDbOgm::link($new['_key'], $main['_key'], ['_tag' => 'hijo']); // conecta el nodo creado con el nodo main
+//  Buscar el archivo .env en la carpeta /src y crear el objeto para manipular la base de datos
+$arangoDbOgm = new BinaryDb(realpath(dirname(__FILE__)) . '/src' ); 
+// Devuelve los valores almacenados en el nodo main.
+$main = $arangoDbOgm::main(); 
+// Preparar datos para guardar en un nuevo nodo
+$data = [
+    'propiedad' => 'valor',
+    'propiedad2' => 'valor2'
+    ];
+// crea un nuevo nodo almacena los datos y devuelve el nodo creado
+$new = $arangoDbOgm::insert($data); 
+// conecta el nodo creado con el nodo main
+$arangoDbOgm::link($new['_key'], $main['_key'], ['_tag' => 'hijo']);
+// Eliminar conexiones al nuevo nodo
+$arangoDbOgm::unlink($main['_key'], $new['_key']);
+// Eliminar el nodo creado
+$arangoDbOgm::remove($new['_key']);
 ```
 En las propiedades (campos) de los nodos así como las aristas (conexiones/relaciones), se debe incluir una propiedad _tag, para la búsqueda y filtrado. Esto hace parte del diseño previo de la base de datos.
 ## Recomendaciones
