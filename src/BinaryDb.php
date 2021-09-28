@@ -42,7 +42,6 @@ class BinaryDb
         self::$nodesCollection = $config['nodesCollection'];
         self::$edgesCollection = $config['edgesCollection'];
         $this->connection = new ArangoConnection($this->connectionOptions);
-        
     }
     private static function layer($layer)
     {
@@ -62,7 +61,7 @@ class BinaryDb
         if (self::$theInstance === null) {
             self::$theInstance = new self($dir);
             self::setTags(self::main());
-        } 
+        }
         return self::$theInstance;
     }
     public static function setTags(array $preOut)
@@ -133,15 +132,11 @@ class BinaryDb
         $key = self::query($query)[0]['_key'];
         return self::timestamp($key, $layer);
     }
-    public static function update(
-        string $key,
-        array $data,
-        string $layer = 'node',
-        string $timeStampProperty = "dateUpdate"
-    ) {
+    public static function update(string $key, array $data, string $layer = 'node', string $property = 'dateUpdate')
+    {
         $collection = self::layer($layer);
         $dataStr = json_encode($data);
-        self::timestamp($key, $layer, $timeStampProperty);
+        self::timestamp($key, $layer, $property);
         $query = " UPDATE  {_key:'$key'} WITH "
             . $dataStr . ' IN '
             . $collection . ' RETURN NEW ';
@@ -182,7 +177,7 @@ class BinaryDb
         $data = array_merge(['_from' => $_from, '_to' => $_to], $data);
         return self::insert($data, 'edge');
     }
-    public static function timestamp($key,  string $layer = 'node',string $property = 'dateUpdate')
+    public static function timestamp($key, string $layer = 'node', string $property = 'dateUpdate')
     {
         $collection = self::layer($layer);
         $query = " UPDATE {_key:'$key'} WITH { $property : DATE_ADD(DATE_NOW(), " . self::$utc . ",'h')} "
