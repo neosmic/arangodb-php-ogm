@@ -22,7 +22,10 @@ También puede renombrar el archivo .env.example
 Debe crearse al menos un documento dentro de la colección de nodos con la propiedad \_tag='main', asimismo se deben asignar las propiedades: *tails*, *tags* y *utc* si puede asignarle el valor de *_key* como 'main'. Ej:
 ```json
 {
-    '_tag':'main'
+    "_tag": "main",
+    "name": "Nodo principal",
+    "tails":["imagenes","documentos"],
+    "tags": ["persona","director","estudiante"]
 }
 ```
 
@@ -34,12 +37,13 @@ composer require neosmic/arango-php-ogm
 ## Uso
 Requiere un archivo .env y se debe indicar el directorio del mismo al momento de inicializar el objeto, ej:
 ```php
-$arangoDbOgm = Neosmic\ArangoPhpOgm\BinaryDb::start('./app/src');
+$arangoDbOgm = Neosmic\ArangoPhpOgm\BinaryDb::start(realpath(dirname(__FILE__)) . '/src'); // Buscará el archivo .env en la carpeta /src
 $main = $arangoDbOgm::main(); // Devuelve los valores almacenados en el nodo main.
 $data = ['propiedad' => 'valor', 'propiedad2' => 'valor2'];
 $new = $arangoDbOgm::insert($data); // crea un nuevo nodo y devuelve el nodo creado
 $arangoDbOgm::link($new['_key'], $main['_key'], ['_tag' => 'hijo']); // conecta el nodo creado con el nodo main
 ```
+En las propiedades (campos) de los nodos así como las aristas (conexiones/relaciones), se debe incluir una propiedad _tag, para la búsqueda y filtrado. Esto hace parte del diseño previo de la base de datos.
 ## Recomendaciones
 
 Utilice esta librería sólo en entornos de prueba y bajo su propia responsabilidad.

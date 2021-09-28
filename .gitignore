@@ -1,4 +1,6 @@
 /vendor/
 /.phpunit.cache/
 to_fix.log
-.env
+/.env
+/src/.env
+index.php
