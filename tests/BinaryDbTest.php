@@ -9,7 +9,7 @@ class BinaryDbTest extends TestCase
 {
     public function testStart()
     {
-        $connection = BinaryDb::start(['envDir' => 'src']);
+        $connection = BinaryDb::start();
 
         $this->assertContainsOnlyInstancesOf(BinaryDb::class, [$connection]);
     }

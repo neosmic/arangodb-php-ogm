@@ -9,7 +9,7 @@ use ArangoDBClient\UpdatePolicy as ArangoUpdatePolicy;
 class Config
 {
 
-    public static function load($options)
+    public static function load($options = [])
     {
 
         if ($options == []) {
@@ -22,10 +22,11 @@ class Config
                 // authorization type to use (currently supported: 'Basic')
                 ArangoConnectionOptions::OPTION_AUTH_TYPE => 'Basic',
                 // user for basic authorization
-                ArangoConnectionOptions::OPTION_AUTH_USER => $config['user'], 
+                ArangoConnectionOptions::OPTION_AUTH_USER => $config['user'],
                 // password for basic authorization
-                ArangoConnectionOptions::OPTION_AUTH_PASSWD => $config['password'], 
-                // connection persistence on server. can use either 'Close' (one-time connections) or 'Keep-Alive' (re-used connections)
+                ArangoConnectionOptions::OPTION_AUTH_PASSWD => $config['password'],
+                // connection persistence on server.
+                // can use either 'Close' (one-time connections) or 'Keep-Alive' (re-used connections)
                 ArangoConnectionOptions::OPTION_CONNECTION => 'Keep-Alive',
                 // connect timeout in seconds
                 ## ArangoConnectionOptions::OPTION_TIMEOUT => 3,
@@ -36,9 +37,9 @@ class Config
                 // optionally create new collections when inserting documents
                 ArangoConnectionOptions::OPTION_UPDATE_POLICY => ArangoUpdatePolicy::LAST,
             ];
-            $out['mainNode'] =  $config['main']; 
-            $out['nodesCollection'] = $config['nodes']; 
-            $out['edgesCollection'] = $config['edges']; 
+            $out['mainNode'] =  $config['main'];
+            $out['nodesCollection'] = $config['nodes'];
+            $out['edgesCollection'] = $config['edges'];
         } else {
             $env = Dotenv::createMutable($options['envDir']);
             $env->load();

@@ -35,7 +35,7 @@ class BinaryDb
     public function __construct($options = [])
     {
         /**
-         * For Laravel, create file binarydb.php 
+         * For Laravel, create file binarydb.php
          */
         $this->property = 1;
         self::$options = $options;
