@@ -9,13 +9,13 @@ class BinaryDbTest extends TestCase
 {
     public function testStart()
     {
-        $connection = BinaryDb::start('/app');
+        $connection = BinaryDb::start();
 
         $this->assertContainsOnlyInstancesOf(BinaryDb::class, [$connection]);
     }
     public function testMain()
     {
-        $connection = BinaryDb::start('/app');
+        $connection = BinaryDb::start(['envDir' => 'src']);
         $out = $connection::main();
         $this->assertArrayHasKey('_key', $out);
     }

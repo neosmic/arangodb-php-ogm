@@ -28,6 +28,32 @@ Debe crearse al menos un documento dentro de la colección de nodos con la propi
     "tags": ["persona","director","estudiante"]
 }
 ```
+### En Laravel
+
+Se deben agregar las siguientes líneas en el archivo config/database.php como un elemento del array _connections_ :
+
+```php
+...
+'binarydb' => [
+            'database' => env('ADB_NAME'),
+            'user' => env('ADB_USER'),
+            'password' => env('ADB_USER_PASSWORD'),
+            'server' => env('ADB_SERVER'),
+            'main' => env('ADB_MAIN'),
+            'nodes' => env('ADB_NODES'),
+            'edges' => env('ADB_EDGES')
+        ]
+...
+```
+
+También al iniciar el objeto no se require pasar ningún parámetro:
+
+```php
+
+Neosmic\ArangoPhpOgm\BinaryDb::start(); // Inicia la conexión a la base de datos
+$main = Neosmic\ArangoPhpOgm\BinaryDb::main(); //Devuelve el nodo main
+...
+```
 
 ## Instalación
 ````cmd
@@ -38,7 +64,7 @@ composer require neosmic/arango-php-ogm
 Requiere un archivo .env y se debe indicar el directorio del mismo al momento de inicializar el objeto, ej:
 ```php
 //  Buscar el archivo .env en la carpeta /src y crear el objeto para manipular la base de datos
-$arangoDbOgm = new BinaryDb(realpath(dirname(__FILE__)) . '/src' ); 
+$arangoDbOgm = BinaryDb::start([ 'envDir' => realpath(dirname(__FILE__)) . '/src' ]); 
 // Devuelve los valores almacenados en el nodo main.
 $main = $arangoDbOgm::main(); 
 // Preparar datos para guardar en un nuevo nodo
