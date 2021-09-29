@@ -16,7 +16,7 @@ class Config
             $config = config('database.connections')['binarydb'];
             $out['config'] = [
                 // database name
-                ArangoConnectionOptions::OPTION_DATABASE => $config['name'],
+                ArangoConnectionOptions::OPTION_DATABASE => $config['database'],
                 // server endpoint to connect to
                 ArangoConnectionOptions::OPTION_ENDPOINT => $config['server'],
                 // authorization type to use (currently supported: 'Basic')
