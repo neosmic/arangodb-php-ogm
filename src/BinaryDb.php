@@ -29,14 +29,19 @@ class BinaryDb
     public static $tails = [];
     public static $utc = 0;
     public static $setted = false;
-    private static $envDir = __DIR__;
+    private static $options = [];
 
 
-    public function __construct($dir = __DIR__)
+    public function __construct($options = [])
     {
+        /**
+         * For Laravel, create file binarydb.php 
+         */
         $this->property = 1;
-        self::$envDir = $dir;
-        $config = Config::load($dir);
+        self::$options = $options;
+
+        $config = Config::load($options);
+        
         $this->connectionOptions = $config['config'];
         self::$mainNode = $config['mainNode'];
         self::$nodesCollection = $config['nodesCollection'];
@@ -55,11 +60,10 @@ class BinaryDb
         return $collection;
     }
 
-    public static function start()
+    public static function start($options = [])
     {
-        $dir = self::$envDir;
         if (self::$theInstance === null) {
-            self::$theInstance = new self($dir);
+            self::$theInstance = new self($options);
             self::setTags(self::main());
         }
         return self::$theInstance;
