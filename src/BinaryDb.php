@@ -126,7 +126,7 @@ class BinaryDb
         $query = " FOR node, edge IN 1..1 INBOUND '"
             . self::$nodesCollection . '/' . $key . "' "
             . self::$edgesCollection
-            . ' RETURN {_key:node._key,id:node._id,_tag:node._tag,name:node.name} ';
+            . ' RETURN {_key:node._key,id:node._id,_tag:node._tag,name:node.name,_outtag:edge._tag} ';
         return self::query($query);
     }
     public static function insert(array $data, string $layer = 'node')
