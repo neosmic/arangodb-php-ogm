@@ -111,13 +111,14 @@ class BinaryDb
         $query = ' FOR d IN ' . self::$nodesCollection . ' ' . $filter . ' SORT d.dateUpdate RETURN d ';
         return self::query($query);
     }
-    public static function one(string $id)
+    public static function one(string $key,string $layer = 'node')
     {
-        return self::query("RETURN DOCUMENT('$id')")[0];
+        $collection = self::layer($layer);
+        return self::query("RETURN DOCUMENT('".$collection.'/'.$key."')")[0];
     }
     public static function main()
     {
-        $out = self::one(self::$nodesCollection . '/' . self::$mainNode);
+        $out = self::one(self::$mainNode);
         return $out;
     }
     public static function parents(string $key)
