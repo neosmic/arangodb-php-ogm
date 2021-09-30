@@ -9,8 +9,7 @@ class BinaryDbTest extends TestCase
 {
     public function testStart()
     {
-        $connection = BinaryDb::start();
-
+        $connection = BinaryDb::start(['envDir' => 'src']);
         $this->assertContainsOnlyInstancesOf(BinaryDb::class, [$connection]);
     }
     public function testMain()
@@ -18,5 +17,12 @@ class BinaryDbTest extends TestCase
         $connection = BinaryDb::start(['envDir' => 'src']);
         $out = $connection::main();
         $this->assertArrayHasKey('_key', $out);
+    }
+    public function testOne()
+    {
+        $connection = BinaryDb::start(['envDir' => 'src']);
+        $main = $connection::one($connection::$mainNode);
+        //print_r($main);
+        $this->assertArrayHasKey('_id', $main);
     }
 }
