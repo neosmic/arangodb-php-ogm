@@ -41,7 +41,7 @@ class BinaryDb
         self::$options = $options;
 
         $config = Config::load($options);
-        
+
         $this->connectionOptions = $config['config'];
         self::$mainNode = $config['mainNode'];
         self::$nodesCollection = $config['nodesCollection'];
@@ -111,10 +111,10 @@ class BinaryDb
         $query = ' FOR d IN ' . self::$nodesCollection . ' ' . $filter . ' SORT d.dateUpdate RETURN d ';
         return self::query($query);
     }
-    public static function one(string $key,string $layer = 'node')
+    public static function one(string $key, string $layer = 'node')
     {
         $collection = self::layer($layer);
-        return self::query("RETURN DOCUMENT('".$collection.'/'.$key."')")[0];
+        return self::query("RETURN DOCUMENT('" . $collection . '/' . $key . "')")[0];
     }
     public static function main()
     {
