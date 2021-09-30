@@ -158,7 +158,7 @@ class BinaryDb
             . self::$nodesCollection . '/' . $key . "' "
             . self::$edgesCollection
             . $filter
-            . ' RETURN {_key:node._key,id:node._id,_tag:edge._tag,name:node.name}  ';
+            . ' RETURN {_key:node._key,id:node._id,_tag:node._tag,_outtag:edge._tag,name:node.name}  ';
         return self::query($query);
     }
     public static function remove($key, $layer = 'node')
