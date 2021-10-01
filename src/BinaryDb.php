@@ -164,8 +164,8 @@ class BinaryDb
             . '_id:node._id,'
             . '_tag:node._tag,'
             . 'name:node.name,'
-            . 'content:node.content'
-            . '_outtag:edge._tag,'
+            . 'content:node.content,'
+            . '_outtag:edge._tag'
             . '}';
         return self::query($query);
     }
