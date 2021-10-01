@@ -126,7 +126,7 @@ class BinaryDb
         $query = " FOR node, edge IN 1..1 INBOUND '"
             . self::$nodesCollection . '/' . $key . "' "
             . self::$edgesCollection
-            . ' RETURN {_key:node._key,id:node._id,_tag:node._tag,name:node.name,_outtag:edge._tag} ';
+            . ' RETURN {_key:node._key,_id:node._id,_tag:node._tag,name:node.name,_outtag:edge._tag} ';
         return self::query($query);
     }
     public static function insert(array $data, string $layer = 'node')
@@ -158,7 +158,7 @@ class BinaryDb
             . self::$nodesCollection . '/' . $key . "' "
             . self::$edgesCollection
             . $filter
-            . ' RETURN {_key:node._key,id:node._id,_tag:node._tag,_outtag:edge._tag,name:node.name}  ';
+            . ' RETURN {_key:node._key,_id:node._id,_tag:node._tag,_outtag:edge._tag,name:node.name}  ';
         return self::query($query);
     }
     public static function remove($key, $layer = 'node')
