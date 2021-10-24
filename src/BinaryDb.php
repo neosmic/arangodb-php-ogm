@@ -106,7 +106,7 @@ class BinaryDb
         if ($pagination != null && is_array($pagination)) {
             $pagination = PreProcess::addPagination($pagination[0], $pagination[1]);
         } else {
-            $pagination = "";
+            $pagination = '';
         }
         $query = ' FOR d IN ' . self::$nodesCollection . ' '
             . $filter . ' SORT d.dateUpdate'
