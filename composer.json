@@ -1,5 +1,5 @@
 {
-  "name": "neosmic/arango-php-ogm",
+  "name": "neosmic/arangodb-php-ogm",
   "description": "PHP library for Object Graph Mapping for a hierarchical graph database in ArangoDB",
   "keywords": ["ogm","database", "arangodb", "graph database", "orm", "environment"],
   "type": "library",
