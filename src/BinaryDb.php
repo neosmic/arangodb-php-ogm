@@ -100,15 +100,17 @@ class BinaryDb
         $conn = self::start();
         return $conn->queryAnswer($query);
     }
-    public static function all($tag = null)
+    public static function all($tags = [], $pagination = null)
     {
-        if ($tag != null) {
-            $filter = " FILTER d._tag == '$tag' ";
+        $filter =  PreProcess::filterOr($tags, '_tag');
+        if ($pagination != null && is_array($pagination)) {
+            $pagination = PreProcess::addPagination($pagination[0], $pagination[1]);
         } else {
-            $filter = '';
+            $pagination = "";
         }
-
-        $query = ' FOR d IN ' . self::$nodesCollection . ' ' . $filter . ' SORT d.dateUpdate RETURN d ';
+        $query = ' FOR d IN ' . self::$nodesCollection . ' '
+            . $filter . ' SORT d.dateUpdate'
+            . $pagination . ' RETURN d ';
         return self::query($query);
     }
     public static function one(string $key, string $layer = 'node')
