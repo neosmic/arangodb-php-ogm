@@ -4,6 +4,7 @@
   "keywords": ["ogm","database", "arangodb", "graph database", "orm", "environment"],
   "type": "library",
   "require": {
+    "composer/composer": "^1.12.23|>= 2.1.9",
     "triagens/arangodb": "^3.8",
     "vlucas/phpdotenv": "^5.3"
   },
