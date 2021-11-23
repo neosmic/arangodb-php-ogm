@@ -1,5 +1,3 @@
-<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-<script>mermaid.initialize({startOnLoad:true});</script>
 # ArangoDB OGM
 
 Librería en PHP para el mapeo de una base de datos de grafos jerárquica direccionada en ArangoDB
@@ -170,20 +168,7 @@ En las propiedades (campos) de los nodos así como las aristas (conexiones/relac
 
 Películas y actores
 
-```mermaid
-graph LR
-
-MAIN --_tag=actors -->ACTORS((actors))
-MAIN -- _tag=movies -->MOVIES((movies))
-ACTORS --actor --> B((Will Smith))
-ACTORS --actor--> C((Bridget M.))
-MOVIES --movie --> D((Yo robot))
-MOVIES --movie --> E((John Wick))
-B --movie --> D
-C --movie --> D
-C --movie --> E
-
-```
+![Grafo de ejemplo](./graph.png)
 
 ## Recomendaciones
 
