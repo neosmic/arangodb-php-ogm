@@ -50,12 +50,12 @@ class BinaryDb
     }
     private static function layer($layer)
     {
-        if ($layer == 'node') {
+        if ($layer == 'node' || null == $layer || 'nodes' == $layer) {
             $collection = self::$nodesCollection;
         } elseif ($layer == 'edge') {
             $collection = self::$edgesCollection;
         } else {
-            return " $layer layer doesn't exist ";
+            $collection = self::$nodesCollection;
         }
         return $collection;
     }
@@ -100,23 +100,44 @@ class BinaryDb
         $conn = self::start();
         return $conn->queryAnswer($query);
     }
-    public static function all($tags = [], $pagination = null)
+    public static function all(
+        $options = [
+            'tags' => [],
+            'pagination' => null,
+            'return' => 'RETURN d',
+            'layer' => 'nodes'
+        ]
+    ): array
     {
-        $filter =  PreProcess::filterOr($tags, '_tag');
-        if ($pagination != null && is_array($pagination)) {
-            $pagination = PreProcess::addPagination($pagination[0], $pagination[1]);
+        $layer = self::layer($options['layer']);
+        $filter =  PreProcess::filterOr($options['tag'], '_tag');
+        if ($options['pagination'] != null && is_array($options['pagination'])) {
+            $pagination = PreProcess::addPagination($options['pagination'][0], $options['pagination'][1]);
         } else {
             $pagination = '';
         }
-        $query = ' FOR d IN ' . self::$nodesCollection . ' '
-            . $filter . ' SORT d.dateUpdate'
-            . $pagination . ' RETURN d ';
+        $query = ' FOR d IN ' . $layer . ' '
+            . $filter . ' SORT d.dateUpdate '
+            . $pagination . ' ' . $options['return'] . ' ';
         return self::query($query);
     }
-    public static function one(string $key, string $layer = 'node')
+    public static function one(
+        string $key,
+        $options = [
+            'layer' => 'node',
+            'return' => null
+        ]
+    ): array
     {
-        $collection = self::layer($layer);
-        return self::query("RETURN DOCUMENT('" . $collection . '/' . $key . "')")[0];
+        $collection = self::layer($options['layer']);
+        if (null == $options['return']) {
+            return self::query("RETURN DOCUMENT('" . $collection . '/' . $key . "')")[0];
+        } else {
+            $query = ' FOR d IN ' . $collection
+                . ' FILTER d._key == ' . $key
+                . ' RETURN ' . $options['return'];
+            return self::query($query);
+        }
     }
     public static function main()
     {
@@ -142,25 +163,15 @@ class BinaryDb
     public static function update(string $key, array $data, string $layer = 'node', string $property = 'dateUpdate')
     {
         $collection = self::layer($layer);
-        $dataStr = json_encode($data);
         self::timestamp($key, $layer, $property);
         $query = " UPDATE  {_key:'$key'} WITH "
-            . $dataStr . ' IN '
+            . json_encode($data) . ' IN '
             . $collection . ' RETURN NEW ';
         return self::query($query)[0];
     }
-    public static function children(string $key, $tag = '')
-    {
-        if ($tag != '') {
-            $filter = " FILTER edge._tag == '$tag' ";
-        } else {
-            $filter = '';
-        }
-        $query = " FOR node, edge IN 1..1 OUTBOUND '"
-            . self::$nodesCollection . '/' . $key . "' "
-            . self::$edgesCollection
-            . $filter
-            . ' RETURN '
+    public static function children(string $key, $options = [
+        'tag' => '',
+        'return' => ' RETURN '
             . '{'
             . '_key:node._key,'
             . '_id:node._id,'
@@ -168,7 +179,20 @@ class BinaryDb
             . 'name:node.name,'
             . 'content:node.content,'
             . '_outtag:edge._tag'
-            . '}';
+            . '}'
+    ]): array
+    {
+        if ($options['tag'] != '' || $options['tag'] != null) {
+            $filter = PreProcess::filterOr($options['tag'], '_tag'); // " FILTER edge._tag == '$tag' ";
+        } else {
+            $filter = '';
+        }
+        $query = " FOR node, edge IN 1..1 OUTBOUND '"
+            . self::$nodesCollection . '/' . $key . "' "
+            . self::$edgesCollection
+            . $filter
+            . ' '
+            . $options['return'];
         return self::query($query);
     }
     public static function remove($key, $layer = 'node')
@@ -199,7 +223,7 @@ class BinaryDb
             . ' IN ' . $collection . ' RETURN NEW';
         return self::query($query)[0];
     }
-    public static function isLinked(string $keyFrom, string $keyTo)
+    public static function isLinked(string $keyFrom, string $keyTo): bool
     {
         $query = ' FOR d IN ' . self::$edgesCollection
             . " FILTER d._from =='" . self::$nodesCollection . '/' . $keyFrom . "' "

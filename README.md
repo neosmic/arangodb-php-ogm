@@ -21,17 +21,11 @@ Se debe crear una base de datos en ArangoDB y crear un archivo de variables llam
 ```text
 
 ADB_SERVER=tcp://127.0.0.1:2589 #Always by tcp protocol
-
 ADB_USER=database_user
-
 ADB_NAME=database_name
-
 ADB_USER_PASSWORD=super_secure_password
-
 ADB_MAIN=main_node_key
-
 ADB_NODES=nodes_collection
-
 ADB_EDGES=edges_collection
 
 ```
@@ -182,4 +176,4 @@ Utilice esta librería sólo en entornos de prueba y bajo su propia responsabili
 
   
 
-Todas las contribuciones son bienvenidas, sin embargo por ahora hace falta un constructor de esquemas, o una integración con uno existente, para desarrollos en Laravel.
+Todas las contribuciones son bienvenidas. Se recomienda utilizar la librería PHPCS Fixer para mantener el estándar.
