@@ -104,13 +104,25 @@ class BinaryDb
         $options = [
             'tags' => [],
             'pagination' => null,
-            'return' => 'RETURN d',
+            'posfilter' => '',
+            'return' => ' d ',
             'layer' => 'nodes'
         ]
     ): array
     {
+        $inputs = [
+            'tags' => [],
+            'posfilter' => '',
+            'pagination' => null,
+            'return' => ' d ',
+            'layer' => 'nodes'
+        ];
+        foreach ($inputs as $key => $value) {
+            $options[$key] = array_key_exists($key, $options) ? $options[$key]  : $value;
+            # code...
+        }
         $layer = self::layer($options['layer']);
-        $filter =  PreProcess::filterOr($options['tag'], '_tag');
+        $filter =  PreProcess::filterOr('_tag', $options['tags']);
         if ($options['pagination'] != null && is_array($options['pagination'])) {
             $pagination = PreProcess::addPagination($options['pagination'][0], $options['pagination'][1]);
         } else {
@@ -118,7 +130,8 @@ class BinaryDb
         }
         $query = ' FOR d IN ' . $layer . ' '
             . $filter . ' SORT d.dateUpdate '
-            . $pagination . ' ' . $options['return'] . ' ';
+            . $options['posfilter'] . ' '
+            . $pagination . ' RETURN ' . $options['return'] . ' ';
         return self::query($query);
     }
     public static function one(
@@ -129,12 +142,21 @@ class BinaryDb
         ]
     ): array
     {
+        $inputs = [
+            'return' => null,
+            'layer' => 'node'
+        ];
+        foreach ($inputs as $skey => $value) {
+            $options[$skey] = array_key_exists($skey, $options) ? $options[$skey]  : $value;
+            # code...
+        }
+
         $collection = self::layer($options['layer']);
         if (null == $options['return']) {
             return self::query("RETURN DOCUMENT('" . $collection . '/' . $key . "')")[0];
         } else {
             $query = ' FOR d IN ' . $collection
-                . ' FILTER d._key == ' . $key
+                . ' FILTER d._key == \'' . $key . '\''
                 . ' RETURN ' . $options['return'];
             return self::query($query);
         }
@@ -169,29 +191,36 @@ class BinaryDb
             . $collection . ' RETURN NEW ';
         return self::query($query)[0];
     }
-    public static function children(string $key, $options = [
-        'tag' => '',
-        'return' => ' RETURN '
-            . '{'
-            . '_key:node._key,'
-            . '_id:node._id,'
-            . '_tag:node._tag,'
-            . 'name:node.name,'
-            . 'content:node.content,'
-            . '_outtag:edge._tag'
-            . '}'
-    ]): array
+    public static function children(
+        string $key,
+        $options = []
+    ): array
     {
-        if ($options['tag'] != '' || $options['tag'] != null) {
-            $filter = PreProcess::filterOr($options['tag'], '_tag'); // " FILTER edge._tag == '$tag' ";
-        } else {
+        $inputs = [
+            'tags' => '',
+            'return' => '{'
+                . '_key:node._key,'
+                . '_id:node._id,'
+                . '_tag:node._tag,'
+                . 'name:node.name,'
+                . 'content:node.content,'
+                . '_outtag:edge._tag'
+                . '}'
+        ];
+        foreach ($inputs as $skey => $value) {
+            $options[$skey] = array_key_exists($skey, $options) ? $options[$skey]  : $value;
+            # code...
+        }
+        if (null == $options['tags'] || '' == $options['tags']) {
             $filter = '';
+        } else {
+            $filter = PreProcess::filterOr($options['tag'], '_tag'); // " FILTER edge._tag == '$tag' ";
         }
         $query = " FOR node, edge IN 1..1 OUTBOUND '"
             . self::$nodesCollection . '/' . $key . "' "
             . self::$edgesCollection
             . $filter
-            . ' '
+            . ' RETURN '
             . $options['return'];
         return self::query($query);
     }
@@ -235,5 +264,69 @@ class BinaryDb
     {
         $collection = self::layer($layer);
         return self::query("RETURN DOCUMENT('" . $collection . '/' . $key . "').$param")[0];
+    }
+    public static function unique(
+        string $key,
+        string $tag,
+        array $combination = [
+            //'property' => 'value',
+            //'property_n' => 'value2'
+        ],
+        string $postfilter = ''
+    ): bool
+    {
+        $filter = function ($combination): string {
+            $out = ' FILTER ';
+            $and = '';
+            foreach ($combination as $skey => $svalue) {
+                $out = $out . $and . 'd.' . $skey . ' == \'' . $svalue . '\' ';
+                $and = ' && ';
+            }
+            return $out;
+        };
+
+        $filterOut = $filter($combination) . " && d._key !='$key' ";
+        $query = ' FOR d IN ' . self::$nodesCollection . '  '
+            . ' FILTER d._tag == \'' . $tag . '\' '
+            . $filterOut . ' RETURN true ';
+        //dd($query);
+        if (true == self::query($query)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    public static function uniqueChild(
+        string $parentKey,
+        string $sonKey,
+        string $tag,
+        array $combination = [
+            //'property' => 'value',
+            //'property_n' => 'value2'
+        ],
+        string $posfilter = ''
+    ): bool
+    {
+        $filter = function ($combination): string {
+            $out = ' FILTER ';
+            $and = '';
+            foreach ($combination as $skey => $svalue) {
+                $out = $out . $and . 'node.' . $skey . ' == \'' . $svalue . '\' ';
+                $and = ' && ';
+            }
+            return $out;
+        };
+        $query = 'FOR node IN 1..1 OUTBOUND \''
+            . self::$nodesCollection . '/' . $parentKey . '\' '
+            . self::$edgesCollection . ' '
+            . ' FILTER node._tag == \'' . $tag . '\' '
+            . $filter($combination) . " && node._key !='$sonKey' "
+            . $posfilter
+            . ' RETURN true ';
+        if (true == self::query($query)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
