@@ -12,7 +12,7 @@ class PreProcess
     {
         return " LIMIT $page, $perPage ";
     }
-    public static function filterOr(mixed $property, $values = [], $variable = 'd')
+    public static function filterOr($property, $values = [], $variable = 'd')
     {
         $values = (is_string($values)) ? [$values] : $values;
         if ($values == []) {
@@ -21,7 +21,7 @@ class PreProcess
             $out = ' FILTER ';
             foreach ($values as $key => $value) {
                 $or =  ($key == 0) ? '' : ' || ';
-                $out .= $variable . $property . ' == ' . $value . $or . ' ';
+                $out .= $or . $variable . '.'  . $property . ' == \'' . $value . '\'' . ' ';
             }
             return $out;
         }
