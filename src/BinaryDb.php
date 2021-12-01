@@ -108,8 +108,7 @@ class BinaryDb
             'return' => ' d ',
             'layer' => 'nodes'
         ]
-    ): array
-    {
+    ): array {
         $inputs = [
             'tags' => [],
             'posfilter' => '',
@@ -140,8 +139,7 @@ class BinaryDb
             'layer' => 'node',
             'return' => null
         ]
-    ): array
-    {
+    ): array {
         $inputs = [
             'return' => null,
             'layer' => 'node'
@@ -166,15 +164,25 @@ class BinaryDb
         $out = self::one(self::$mainNode);
         return $out;
     }
-    public static function parents(string $key)
+    public static function parents(string $key, $options = [])
     {
+        $inputs = [
+            'tags' => [],
+            'return' => ' {_key:node._key,_id:node._id,_tag:node._tag,name:node.name,_outtag:edge._tag} '
+        ];
+        foreach ($inputs as $skey => $value) {
+            $options[$skey] = array_key_exists($skey, $options) ? $options[$skey]  : $value;
+            # code...
+        }
+        $filter =  PreProcess::filterOr('_tag', $options['tags'], 'edge');
         $query = " FOR node, edge IN 1..1 INBOUND '"
             . self::$nodesCollection . '/' . $key . "' "
             . self::$edgesCollection
-            . ' RETURN {_key:node._key,_id:node._id,_tag:node._tag,name:node.name,_outtag:edge._tag} ';
+            . $filter
+            . ' RETURN' . $options['return'];
         return self::query($query);
     }
-    public static function insert(array $data, string $layer = 'node')
+    public static function insert(array $data, string $layer = 'node'): array
     {
         $collection = self::layer($layer);
         $query = ' INSERT ' . json_encode($data)
@@ -194,8 +202,7 @@ class BinaryDb
     public static function children(
         string $key,
         $options = []
-    ): array
-    {
+    ): array {
         $inputs = [
             'tags' => '',
             'return' => '{'
@@ -205,7 +212,8 @@ class BinaryDb
                 . 'name:node.name,'
                 . 'content:node.content,'
                 . '_outtag:edge._tag'
-                . '}'
+                . '}',
+            'posfilter' => ''
         ];
         foreach ($inputs as $skey => $value) {
             $options[$skey] = array_key_exists($skey, $options) ? $options[$skey]  : $value;
@@ -214,14 +222,41 @@ class BinaryDb
         if (null == $options['tags'] || '' == $options['tags']) {
             $filter = '';
         } else {
-            $filter = PreProcess::filterOr($options['tag'], '_tag'); // " FILTER edge._tag == '$tag' ";
+            $filter = PreProcess::filterOr('_tag', $options['tags'], 'edge'); // " FILTER edge._tag == '$tag' ";
         }
         $query = " FOR node, edge IN 1..1 OUTBOUND '"
             . self::$nodesCollection . '/' . $key . "' "
             . self::$edgesCollection
-            . $filter
+            . $filter . '  '
+            . $options['posfilter'] . ' '
             . ' RETURN '
             . $options['return'];
+        return self::query($query);
+    }
+    public static function descendant(string $startnode, $options = [])
+    {
+        $inputs = [
+            'tags' => [],
+            'return' => ' node ',
+            'deep' => 10,
+            'prefilter' => '',
+            'posfilter' => ''
+        ];
+        foreach ($inputs as $skey => $value) {
+            $options[$skey] = array_key_exists($skey, $options) ? $options[$skey]  : $value;
+            # code...
+        }
+        if (null == $options['tags'] || '' == $options['tags']) {
+            $filter = '';
+        } else {
+            $filter = PreProcess::filterOr('_tag', $options['tags'], 'edge');
+        }
+        $query = "FOR node, edge, path IN 1.." . $options['deep'] . " OUTBOUND "
+            . " '" . self::$nodesCollection . '/' . $startnode . "' " . self::$edgesCollection . " "
+            . $options['prefilter'] . ' '
+            . $filter . ' '
+            . $options['posfilter'] . ' '
+            . " RETURN " . $options['return'];
         return self::query($query);
     }
     public static function remove($key, $layer = 'node')
@@ -273,8 +308,7 @@ class BinaryDb
             //'property_n' => 'value2'
         ],
         string $postfilter = ''
-    ): bool
-    {
+    ): bool {
         $filter = function ($combination): string {
             $out = ' FILTER ';
             $and = '';
@@ -289,7 +323,6 @@ class BinaryDb
         $query = ' FOR d IN ' . self::$nodesCollection . '  '
             . ' FILTER d._tag == \'' . $tag . '\' '
             . $filterOut . ' RETURN true ';
-        //dd($query);
         if (true == self::query($query)) {
             return false;
         } else {
@@ -305,8 +338,7 @@ class BinaryDb
             //'property_n' => 'value2'
         ],
         string $posfilter = ''
-    ): bool
-    {
+    ): bool {
         $filter = function ($combination): string {
             $out = ' FILTER ';
             $and = '';
